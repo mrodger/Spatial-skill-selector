@@ -1,6 +1,6 @@
 # Skill Selector
 
-Semantic spatial search over a corpus of Claude skills. Paste an agent message or describe what you need — the system embeds your query, projects it into a 3D semantic space built from 3,500+ skills, and returns the closest matches ranked by a blend of cosine similarity and PostGIS spatial distance.
+Semantic spatial search over a corpus of Claude skills. Paste an agent message or describe what you need — the system embeds your query, projects it into a 3D semantic space built from 3,500+ skills, and returns the closest matches ranked by a blend of cosine similarity and 3D spatial distance.
 
 ![Results — spatial vs semantic comparison](docs/03-results-compare.png)
 
@@ -14,7 +14,7 @@ Semantic spatial search over a corpus of Claude skills. Paste an agent message o
 2. Parse frontmatter and body — extract name, description, category, size tier
 3. Embed each skill's description via `text-embedding-3-small` (1536D)
 4. Fit a UMAP reducer over the full embedding corpus → project every skill to 3D
-5. Write embeddings + 3D coordinates to PostGIS (`skill_selector.skills`)
+5. Write embeddings + 3D coordinates to the database (`skill_selector.skills`)
 6. Compute per-domain centroids and local projections (`skill_selector.domains`, `skill_selector.skill_domains`)
 
 **Runtime (per query):**
@@ -49,9 +49,9 @@ Click any result card to read the full `SKILL.md` body, see match scores, and do
 | API server | FastAPI — port 8200 |
 | Embeddings | OpenAI `text-embedding-3-small` (1536D) |
 | Dimensionality reduction | UMAP → 3D, pickled to `umap_transform.pkl` |
-| Database | PostgreSQL + pgvector + PostGIS |
+| Database | PostgreSQL + pgvector |
 | Vector search | HNSW index (`vector_cosine_ops`) |
-| Spatial search | GiST index on `geometry(PointZ, 0)` |
+| Spatial search | GiST index on 3D point geometry |
 | Frontend | Vanilla JS + Three.js point cloud |
 | Skill sources | GitHub crawl — `SKILL.md` convention |
 
@@ -61,7 +61,7 @@ Click any result card to read the full `SKILL.md` body, see match scores, and do
 
 ### 1. Database
 
-Requires PostgreSQL with `pgvector` and `postgis` extensions. Set `DATABASE_URL` in your environment or `.secrets.env`.
+Requires PostgreSQL with the `pgvector` extension. Set `DATABASE_URL` in your environment or `.secrets.env`.
 
 ```bash
 psql $DATABASE_URL -f schema.sql
@@ -93,7 +93,7 @@ python ingest.py --skip-umap
 python ingest.py --dry-run
 ```
 
-Ingestion writes embeddings, fits UMAP, stores 3D coordinates in PostGIS, and saves the reducer to `umap_transform.pkl`.
+Ingestion writes embeddings, fits UMAP, stores 3D coordinates, and saves the reducer to `umap_transform.pkl`.
 
 ### 4. Serve
 
@@ -148,16 +148,16 @@ python server.py
 ## Database schema
 
 ```
-skill_selector.skills          — one row per skill
-  embedding   vector(1536)     — HNSW index (cosine)
-  point_3d    geometry(PointZ) — GiST index (spatial KNN)
+skill_selector.skills        — one row per skill
+  embedding   vector(1536)   — HNSW index (cosine)
+  point_3d    point (3D)     — GiST index (spatial KNN)
 
-skill_selector.domains         — one row per category cluster
-  centroid    vector(1536)     — mean embedding across all skills in domain
-  centroid_3d geometry(PointZ) — UMAP-projected domain centre
+skill_selector.domains       — one row per category cluster
+  centroid    vector(1536)   — mean embedding across all skills in domain
+  centroid_3d point (3D)     — UMAP-projected domain centre
 
-skill_selector.skill_domains   — junction table
-  point_3d_local geometry(PointZ) — per-domain local UMAP projection
+skill_selector.skill_domains — junction table
+  point_3d_local point (3D)  — per-domain local UMAP projection
 ```
 
 ---
