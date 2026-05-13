@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Skill Selector</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div id="app">
+
+    <header id="header">
+      <div id="header-brand">
+        <span class="brand-icon"><i class="ph ph-lightning"></i></span>
+        <span class="brand-name">Skill Selector</span>
+        <span id="skill-count-label"></span>
+      </div>
+      <div id="header-meta">
+        <button id="toggle-wires-btn" class="btn-sm" title="Toggle cluster wireframes">
+          <i class="ph ph-circles-three"></i> Clusters
+        </button>
+      </div>
+    </header>
+
+    <main id="main">
+
+      <!-- Left column: input + results -->
+      <section id="left-col">
+
+        <div id="chat-pane">
+          <div id="search-box">
+            <i class="ph ph-chat-dots search-icon"></i>
+            <textarea
+              id="query-input"
+              placeholder="Paste an agent message or describe what you need…"
+              rows="3"
+              spellcheck="false"
+            ></textarea>
+            <button id="search-btn" title="Find skills">
+              <i class="ph ph-arrow-right"></i>
+            </button>
+          </div>
+          <div id="domain-tag" class="hidden"></div>
+        </div>
+
+        <!-- Empty state -->
+        <div id="compare-empty">
+          <i class="ph ph-intersect-three"></i>
+          <p>Enter an agent message above to compare<br>spatial vs semantic skill matching</p>
+          <div id="example-queries">
+            <button class="example-btn">my agent keeps looping on the same step</button>
+            <button class="example-btn">I need something to keep tabs on what my agent gets up to while I'm not watching</button>
+            <button class="example-btn">summarise this PDF and pull out the numbers</button>
+          </div>
+        </div>
+
+        <!-- Results: two columns -->
+        <div id="compare-cols" class="hidden">
+          <div class="compare-col" id="spatial-col">
+            <div class="col-header">
+              <span class="col-title"><i class="ph ph-cube"></i> Spatial</span>
+              <span class="col-subtitle">3D cluster · domain-filtered</span>
+            </div>
+            <div class="col-cards" id="spatial-cards"></div>
+          </div>
+          <div class="compare-col" id="semantic-col">
+            <div class="col-header">
+              <span class="col-title"><i class="ph ph-wave-sine"></i> Semantic</span>
+              <span class="col-subtitle">1536D cosine · global</span>
+            </div>
+            <div class="col-cards" id="semantic-cards"></div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- Right: always-on pointcloud -->
+      <section id="map-panel">
+        <div id="map-domain-label" class="hidden"></div>
+        <canvas id="map-canvas"></canvas>
+        <div id="map-tooltip"></div>
+        <div id="loading-overlay">
+          <span class="spinner"></span>
+          <span>Loading corpus…</span>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Skill detail modal -->
+  <div id="modal-overlay" class="hidden">
+    <div id="modal">
+      <div id="modal-header">
+        <div>
+          <div id="modal-title"></div>
+          <div id="modal-badges"></div>
+        </div>
+        <button id="modal-close" class="btn-icon"><i class="ph ph-x"></i></button>
+      </div>
+      <div id="modal-body">
+        <p id="modal-description"></p>
+        <div id="modal-content"></div>
+      </div>
+      <div id="modal-footer">
+        <a id="modal-source-link" href="#" target="_blank" rel="noopener" class="btn-secondary">
+          <i class="ph ph-github-logo"></i> View on GitHub
+        </a>
+        <a id="modal-download-link" href="#" download class="btn-primary">
+          <i class="ph ph-download-simple"></i> Download SKILL.md
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+      }
+    }
+  </script>
+  <script type="module" src="/static/app.js"></script>
+</body>
+</html>
